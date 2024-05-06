@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <input type="file" id="input" onchange="handleFile()" />
+    <div>
+        <ul id="list_result">
+            
+        </ul>
+        <div >
+            Số ly : <span id="glass"></span>
+        </div>
+    </div>
+<script>
+    let data_list = []
+    function handleFile() {
+        const input = document.getElementById('input');
+        const sizes = {L: 0, M: 0, "800": 0, "OO": 0};
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+          
+          
+            data_list = jsonData.slice(9).filter(item => item.length !== 0);
+            data_list = data_list.slice(0, -5)
+            data_list = data_list.filter(row => !isNaN(row[4]));
+            const sum = sum_reduce(data_list, '9');
+            data_list.map(row => {
+                const lastWord = row[5].trim().split(' ').pop();
+                // console.log(lastWord)
+                if (sizes.hasOwnProperty(lastWord)) {
+                    sizes[lastWord] += row[4];
+                }
+            });
+            const display_list = document.getElementById('list_result');
+            
+            for (let key in sizes) {
+              
+               const node = document.createElement('li');
+               node.innerHTML = `${key}: ${sizes[key]}`
+               display_list.appendChild(node);
+            }
+            document.getElementById('glass').innerHTML = `${sizes["L"]+sizes["M"]}`
+
+            // console.log(data_list, sum, sizes)
+        };
+        reader.readAsArrayBuffer(input.files[0]);
+    }
+    const sum_reduce = (arr, key) => {
+    return arr.reduce((sum, obj) => sum + (parseInt(obj[key]) || 0), 0);
+    }
+    
+</script>
+
+
+</body>
+</html>
