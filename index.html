@@ -22,13 +22,14 @@
         const input = document.getElementById('input');
         const sizes = {L: 0, M: 0, "800": 0, "OO": 0};
         const reader = new FileReader();
+        const display_list = document.getElementById('list_result');
         reader.onload = function(e) {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
             const worksheet = workbook.Sheets[workbook.SheetNames[0]];
             const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
           
-          
+            display_list.innerHTML = ``
             data_list = jsonData.slice(9).filter(item => item.length !== 0);
             data_list = data_list.slice(0, -5)
             data_list = data_list.filter(row => !isNaN(row[4]));
@@ -40,7 +41,7 @@
                     sizes[lastWord] += row[4];
                 }
             });
-            const display_list = document.getElementById('list_result');
+          
             
             for (let key in sizes) {
               
